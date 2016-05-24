@@ -2,6 +2,7 @@ import React, {Component, PropTypes} from "react";
 import {
   NativeAppEventEmitter,
   NativeModules,
+    Platform,
   StyleSheet,
   requireNativeComponent,
   View,
@@ -32,6 +33,10 @@ function convertStringProps(props) {
     newProps.type = Camera.constants.Type[props.type];
   }
 
+  if (typeof props.captureQuality === 'string') {
+    newProps.captureQuality = Camera.constants.CaptureQuality[props.captureQuality];
+  }
+
   return newProps;
 }
 
@@ -43,6 +48,7 @@ export default class Camera extends Component {
     Type: CameraManager.Type,
     CaptureMode: CameraManager.CaptureMode,
     CaptureTarget: CameraManager.CaptureTarget,
+    CaptureQuality: CameraManager.CaptureQuality,
     Orientation: CameraManager.Orientation,
     FlashMode: CameraManager.FlashMode,
     TorchMode: CameraManager.TorchMode
@@ -59,6 +65,10 @@ export default class Camera extends Component {
       PropTypes.string,
       PropTypes.number
     ]),
+    captureQuality: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number
+    ]),
     captureTarget: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.number
@@ -72,10 +82,12 @@ export default class Camera extends Component {
     onBarCodeRead: PropTypes.func,
     onFocusChanged: PropTypes.func,
     onZoomChanged: PropTypes.func,
+    mirrorImage: PropTypes.bool,
     orientation: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.number
     ]),
+    playSoundOnCapture: PropTypes.bool,
     torchMode: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.number
@@ -93,12 +105,17 @@ export default class Camera extends Component {
     captureAudio: true,
     captureMode: CameraManager.CaptureMode.still,
     captureTarget: CameraManager.CaptureTarget.cameraRoll,
+    captureQuality: CameraManager.CaptureQuality.high,
     defaultOnFocusComponent: true,
     flashMode: CameraManager.FlashMode.off,
-    torchMode: CameraManager.TorchMode.off
+    playSoundOnCapture: true,
+    torchMode: CameraManager.TorchMode.off,
+    mirrorImage: false,
   };
 
   static checkDeviceAuthorizationStatus = CameraManager.checkDeviceAuthorizationStatus;
+  static checkVideoAuthorizationStatus = CameraManager.checkVideoAuthorizationStatus;
+  static checkAudioAuthorizationStatus = CameraManager.checkAudioAuthorizationStatus;
 
   setNativeProps(props) {
     this.refs[CAMERA_REF].setNativeProps(props);
@@ -115,8 +132,10 @@ export default class Camera extends Component {
   async componentWillMount() {
     this.cameraBarCodeReadListener = NativeAppEventEmitter.addListener('CameraBarCodeRead', this.props.onBarCodeRead);
 
-    if (Camera.checkDeviceAuthorizationStatus) {
-      const isAuthorized = await Camera.checkDeviceAuthorizationStatus();
+    let check = this.props.captureAudio ? Camera.checkDeviceAuthorizationStatus : Camera.checkVideoAuthorizationStatus;
+
+    if (check) {
+      const isAuthorized = await check();
       this.setState({ isAuthorized });
     }
   }
@@ -141,7 +160,9 @@ export default class Camera extends Component {
     options = {
       audio: props.captureAudio,
       mode: props.captureMode,
+      playSoundOnCapture: props.playSoundOnCapture,
       target: props.captureTarget,
+      quality: props.captureQuality,
       type: props.type,
       title: '',
       description: '',
@@ -159,9 +180,10 @@ export default class Camera extends Component {
 
   stopCapture() {
     if (this.state.isRecording) {
-      CameraManager.stopCapture();
       this.setState({ isRecording: false });
+      return CameraManager.stopCapture();
     }
+    return Promise.resolve("Not Recording.");
   }
 
   getFOV() {
@@ -169,6 +191,12 @@ export default class Camera extends Component {
   }
 
   hasFlash() {
+    if (Platform.OS === 'android') {
+      const props = convertStringProps(this.props);
+      return CameraManager.hasFlash({
+        type: props.type
+      });
+    }
     return CameraManager.hasFlash();
   }
 }
