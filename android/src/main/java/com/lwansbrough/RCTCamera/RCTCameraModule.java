@@ -210,7 +210,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule implements Media
         }
 
         cm.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
-        cm.videoCodec = MediaRecorder.VideoEncoder.MPEG_4_SP;
+        cm.videoCodec = MediaRecorder.VideoEncoder.H264;
         mMediaRecorder.setProfile(cm);
 
         mVideoFile = null;
