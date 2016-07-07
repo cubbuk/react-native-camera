@@ -395,10 +395,15 @@ public class RCTCameraModule extends ReactContextBaseJavaModule implements Media
                     case RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL:
                         BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
                         Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, bitmapOptions);
-                        String url = MediaStore.Images.Media.insertImage(
+                        //timestamp is added to image
+                        String url = CapturePhotoUtils.insertImage(
                                 _reactContext.getContentResolver(),
                                 bitmap, options.getString("title"),
                                 options.getString("description"));
+                        /*String url = MediaStore.Images.Media.insertImage(
+                                _reactContext.getContentResolver(),
+                                bitmap, options.getString("title"),
+                                options.getString("description"));*/
                         promise.resolve(url);
                         break;
                     case RCT_CAMERA_CAPTURE_TARGET_DISK:
