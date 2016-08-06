@@ -470,7 +470,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule implements Media
 
     private File getOutputMediaFile(int type) {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "RCTCameraModule");
+                Environment.DIRECTORY_PICTURES), "sikayetvar");
 
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
