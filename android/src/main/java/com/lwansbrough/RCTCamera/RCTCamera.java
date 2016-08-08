@@ -264,7 +264,7 @@ public class RCTCamera {
 
     public CamcorderProfile setCaptureVideoQuality(int cameraType, String captureQuality) {
         Camera camera = _cameras.get(cameraType);
-        CamcorderProfile cm = CamcorderProfile.get(_cameraTypeToIndex.get(cameraType), CamcorderProfile.QUALITY_480P);
+        CamcorderProfile cm = CamcorderProfile.get(_cameraTypeToIndex.get(cameraType), CamcorderProfile.QUALITY_HIGH); // default high
 
         if ((null == camera) || (null == cm)){
             return null;
