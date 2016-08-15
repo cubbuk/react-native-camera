@@ -275,15 +275,22 @@ public class RCTCamera {
         switch (captureQuality) {
             case "low":
                 videoSize = getSmallestVideoSize(cameraType); // select the lowest res
+                cm = CamcorderProfile.get(_cameraTypeToIndex.get(cameraType), CamcorderProfile.QUALITY_480P);
                 break;
             case "medium":
                 // defer to preview instead of params.getSupportedVideoSizes() http://bit.ly/1rxOsq0
                 List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
                 videoSize = sizes.get(sizes.size() / 2);
+                cm = CamcorderProfile.get(_cameraTypeToIndex.get(cameraType), CamcorderProfile.QUALITY_720P);
                 break;
             case "high":
                 videoSize = getBestVideoSize(cameraType, Integer.MAX_VALUE, Integer.MAX_VALUE); // select the highest res
+                cm = CamcorderProfile.get(_cameraTypeToIndex.get(cameraType), CamcorderProfile.QUALITY_HIGH);
                 break;
+        }
+
+        if (cm == null){
+                    return null;
         }
 
         if (videoSize != null) {
